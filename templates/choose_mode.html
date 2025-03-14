@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Seleccione el método de carga de Excel</h2>
+  <div class="text-center mt-4">
+    <a href="{{ url_for('upload_file') }}" class="btn btn-custom">Subir Excel Manualmente</a>
+  </div>
+  <div class="text-center mt-4">
+    <a href="{{ url_for('auto_generate') }}" class="btn btn-custom">Subir Excel Automáticamente</a>
+  </div>
+{% endblock %}
