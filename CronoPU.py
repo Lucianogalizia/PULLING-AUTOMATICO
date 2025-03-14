@@ -99,7 +99,6 @@ def upload_file():
 @app.route("/auto_generate", methods=["GET", "POST"])
 def auto_generate():
     if request.method == "POST":
-        # Procesar la edición realizada en la vista previa
         try:
             rows = int(request.form.get("rows"))
             cols = int(request.form.get("cols"))
@@ -112,16 +111,18 @@ def auto_generate():
                     row_data.append(cell_value)
                 data.append(row_data)
             df_editado = pd.DataFrame(data, columns=columns)
-            # Aquí se pueden agregar conversiones (por ejemplo, convertir a numérico ciertas columnas)
+            # Realiza conversiones si es necesario, por ejemplo a numérico.
             data_store["df"] = df_editado
             flash("✅ Archivo automático modificado y guardado con éxito.")
             return redirect(url_for("filter_zonas"))
         except Exception as e:
+            app.logger.error("Error en auto_generate (POST): %s", e)
             flash(f"❌ Error al procesar la edición del archivo: {e}")
-            return redirect(request.url)
+            # En vez de redirigir a request.url, redirige a una página de error o muestra el mensaje.
+            return render_template("error.html", error_message=str(e))
     else:
         try:
-            # ── 1) CONEXIONES Y EJECUCIÓN DE CONSULTAS ──
+            # Aquí se integra el código real de obtención del Excel
             conn_str_perdidas    = "oracle+cx_oracle://RY16123:Luciano280@suarbultowp01:1521/pcct"
             conn_str_tiempo      = "oracle+cx_oracle://RY16123:Luciano280@slpazrusora09:1527/PSOL"
             conn_str_coordenadas = "oracle+cx_oracle://RY16123:Luciano280@slpazrusora09:1527/PSOL"
@@ -210,7 +211,7 @@ def auto_generate():
                    FIC_CONTROLES.PROD_OIL, 
                    FIC_CONTROLES.PROD_WAT+FIC_CONTROLES.PROD_OIL AS PROD_WAT_OIL
             FROM DISC_ADMINS.DBU_FIC_ORG_ESTRUCTURAL DBU_FIC_ORG_ESTRUCTURAL, 
-                 DISC_ADMINS.FIC_CONTROLES FIC_CONTROLES
+                 DISC_ADMIN.FIC_CONTROLES FIC_CONTROLES
             WHERE ( FIC_CONTROLES.COMP_SK = DBU_FIC_ORG_ESTRUCTURAL.COMP_SK ) 
                   AND ( FIC_CONTROLES.PROPOSITO_CONTROL = 'Alocación' ) 
                   AND ( FIC_CONTROLES.EFF_DT >= TO_DATE('20220101000000','YYYYMMDDHH24MISS') ) 
@@ -299,7 +300,7 @@ def auto_generate():
                                  'TIEMPO PLANIFICADO']]
             df_final.rename(columns={'NOMBRE_POZO': 'POZO'}, inplace=True)
 
-            # Asignamos el DataFrame generado al data_store y lo enviamos a la vista previa editable
+            # Almacenamos el DataFrame generado y lo enviamos a la vista previa editable
             data_store["df"] = df_final
             return render_template("auto_preview.html", 
                                    table=df_final.head().to_html(classes="table table-striped", index=False),
@@ -307,8 +308,9 @@ def auto_generate():
                                    rows=len(df_final), 
                                    data=df_final.values.tolist())
         except Exception as e:
+            app.logger.error("Error en auto_generate (GET): %s", e)
             flash(f"❌ Error al generar el Excel automático: {e}")
-            return redirect(request.url)
+            return render_template("error.html", error_message=str(e))
 
 # ─────────────────────────────────────────────
 # RUTA 3: FILTRADO DE ZONAS Y SELECCIÓN DE PULLING
