@@ -1,0 +1,7 @@
+<!-- templates/error.html -->
+{% extends "base.html" %}
+{% block content %}
+  <h1>Error</h1>
+  <p>{{ error_message }}</p>
+  <a href="{{ url_for('choose_mode') }}" class="btn btn-custom">Volver</a>
+{% endblock %}
