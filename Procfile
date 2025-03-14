@@ -1,1 +1,1 @@
-web: gunicorn CronoPu:app --timeout 120 --workers 1
+web: gunicorn CronoPU:app --timeout 120 --workers 1
