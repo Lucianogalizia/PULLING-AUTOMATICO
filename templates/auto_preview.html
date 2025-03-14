@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Vista Previa y Edición del Excel Automático</h2>
+  <form method="post">
+    <input type="hidden" name="rows" value="{{ rows }}">
+    <input type="hidden" name="cols" value="{{ columns|length }}">
+    {% for col in columns %}
+      <input type="hidden" name="columns" value="{{ col }}">
+    {% endfor %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          {% for col in columns %}
+            <th>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in range(rows) %}
+        <tr>
+          {% for j in range(columns|length) %}
+          <td>
+            <input type="text" name="cell_{{ i }}_{{ j }}" value="{{ data[i][j] }}" class="form-control">
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-custom">Guardar y Continuar</button>
+  </form>
+{% endblock %}
